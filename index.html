@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversor de texto com parágrafos</title>
+    <style>
+        /* Estilos básicos para tornar a página limpa e legível */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            max-width: 720px;
+            width: 100%;
+            border-radius: 28px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+            padding: 30px 28px 40px;
+            transition: all 0.2s;
+        }
+        h1 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #1e293b;
+            letter-spacing: -0.3px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .sub {
+            color: #475569;
+            font-size: 0.95rem;
+            margin-bottom: 24px;
+            border-left: 3px solid #94a3b8;
+            padding-left: 14px;
+            background: #f8fafc;
+            border-radius: 0 8px 8px 0;
+            line-height: 1.4;
+        }
+        textarea {
+            width: 100%;
+            padding: 18px 16px;
+            font-size: 1rem;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            border: 1px solid #d1d5db;
+            border-radius: 18px;
+            background: #fafcff;
+            resize: vertical;
+            min-height: 170px;
+            transition: border 0.2s, box-shadow 0.2s;
+            color: #0f172a;
+        }
+        textarea:focus {
+            border-color: #6366f1;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+            background: white;
+        }
+        .botoes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 20px 0 22px;
+        }
+        button {
+            background: #eef2ff;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: #1e293b;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s;
+            border: 1px solid transparent;
+            flex: 1 0 auto;
+            justify-content: center;
+            position: relative;
+        }
+        button.primario {
+            background: #6366f1;
+            color: white;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.25);
+        }
+        button.primario:hover {
+            background: #4f46e5;
+            transform: scale(0.98);
+            box-shadow: 0 6px 14px rgba(99, 102, 241, 0.35);
+        }
+        button.secundario {
+            background: #f1f5f9;
+            border-color: #d1d5db;
+        }
+        button.secundario:hover {
+            background: #e2e8f0;
+        }
+        button:active {
+            transform: scale(0.96);
+        }
+        button.copiar {
+            background: #10b981;
+            color: white;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25);
+        }
+        button.copiar:hover {
+            background: #059669;
+            transform: scale(0.98);
+            box-shadow: 0 6px 14px rgba(16, 185, 129, 0.35);
+        }
+        /* Tooltip estilizado */
+        .tooltip {
+            position: relative;
+            display: inline-flex;
+        }
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            opacity: 0;
+            width: 160px;
+            background-color: #1e293b;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 8px 12px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: opacity 0.3s, visibility 0.3s;
+            font-size: 0.85rem;
+            font-weight: 400;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        .tooltip .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -6px;
+            border-width: 6px;
+            border-style: solid;
+            border-color: #1e293b transparent transparent transparent;
+        }
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        .tooltip .tooltip-text.mostrar {
+            visibility: visible;
+            opacity: 1;
+        }
+        .resultado {
+            margin-top: 10px;
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 18px 20px;
+            border: 1px solid #e2e8f0;
+            min-height: 70px;
+            position: relative;
+        }
+        .resultado p {
+            margin: 0 0 0.9rem 0;
+            line-height: 1.6;
+            color: #0f172a;
+            word-break: break-word;
+        }
+        .resultado p:last-of-type {
+            margin-bottom: 0;
+        }
+        .placeholder-texto {
+            color: #64748b;
+            font-style: italic;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .footer-ajuda {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 18px;
+            text-align: right;
+            border-top: 1px dashed #d1d5db;
+            padding-top: 16px;
+        }
+        .exemplo-link {
+            color: #6366f1;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: underline dotted;
+        }
+        .exemplo-link:hover {
+            color: #4f46e5;
+        }
+        @media (max-width: 480px) {
+            .card { padding: 22px 16px; }
+            textarea { min-height: 140px; }
+            .tooltip .tooltip-text {
+                width: 140px;
+                font-size: 0.75rem;
+                white-space: normal;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>📄 Parágrafos com quebras</h1>
+    <div class="sub">
+        Cole ou digite seu texto. Linhas vazias separam parágrafos.
+    </div>
+
+    <!-- Área de entrada -->
+    <textarea id="entrada" placeholder="Exemplo:&#10;Lorem ipsum&#10;dolor sit&#10;amet, consectetur adipiscing&#10;elit.&#10;&#10;Nunc justo nibh, facilisis ac&#10;risus sit amet, convallis tempor erat.&#10;&#10;Praesent&#10;at augue bibendum..."></textarea>
+
+    <!-- Botões -->
+    <div class="botoes">
+        <button class="primario" id="btnConverter">🔄 Converter</button>
+        <button class="secundario" id="btnLimpar">✕ Limpar</button>
+        <button class="secundario" id="btnExemplo">📋 Exemplo</button>
+        <button class="copiar" id="btnCopiar">
+            <span class="tooltip">
+                📄 Copiar resultado
+                <span class="tooltip-text" id="tooltipCopiar">✅ Copiado!</span>
+            </span>
+        </button>
+    </div>
+
+    <!-- Área de resultado -->
+    <div class="resultado" id="resultado">
+        <div class="placeholder-texto">
+            <span>⬇️</span> O texto convertido aparecerá aqui.
+        </div>
+    </div>
+    <div class="footer-ajuda">
+        <span>🔹 Linhas vazias → novo parágrafo</span>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // Elementos DOM
+        const entrada = document.getElementById('entrada');
+        const resultadoDiv = document.getElementById('resultado');
+        const btnConverter = document.getElementById('btnConverter');
+        const btnLimpar = document.getElementById('btnLimpar');
+        const btnExemplo = document.getElementById('btnExemplo');
+        const btnCopiar = document.getElementById('btnCopiar');
+        const tooltipCopiar = document.getElementById('tooltipCopiar');
+
+        // Texto de exemplo (idêntico ao que você forneceu)
+        const TEXTO_EXEMPLO = `Lorem ipsum 
+dolor sit 
+amet, consectetur adipiscing 
+elit.
+
+Nunc justo nibh, facilisis ac
+risus sit amet, convallis tempor erat. 
+
+Praesent 
+at augue bibendum, dignissim dui non, pulvinar leo.`;
+
+        /**
+         * Converte o texto da área de entrada em parágrafos HTML.
+         * Regra: quebras de linha simples são ignoradas (juntam o texto),
+         * linhas vazias (sequência de \n\n ou \n \n) indicam novo parágrafo.
+         */
+        function converterTextoParaParagrafos(texto) {
+            // Normaliza quebras de linha para \n (remove \r)
+            let normalizado = texto.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+            
+            // Divide em blocos separados por uma ou mais linhas vazias.
+            const linhas = normalizado.split('\n');
+            const linhasTratadas = linhas.map(linha => {
+                // Se a linha contém apenas espaços, tabs, ou está vazia -> consideramos vazia
+                if (/^\s*$/.test(linha)) {
+                    return '';   // linha vazia normalizada
+                }
+                return linha;    // mantém a linha com seu conteúdo
+            });
+
+            // Reconstrói o texto com as linhas tratadas
+            const textoTratado = linhasTratadas.join('\n');
+
+            // Agora divide por um ou mais \n consecutivos (linhas vazias)
+            const blocos = textoTratado.split(/\n\s*\n/);
+            
+            // Filtra blocos vazios (caso sobre)
+            const paragrafos = blocos.filter(bloco => bloco.trim() !== '');
+
+            // Cada bloco pode ter quebras de linha internas (que devem ser removidas, 
+            // transformando em espaços para juntar a linha)
+            const paragrafosFormatados = paragrafos.map(bloco => {
+                // Substitui todas as quebras de linha internas por espaço
+                // e reduz múltiplos espaços para um único (opcional, mas melhora legibilidade)
+                let par = bloco.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
+                return par;
+            });
+
+            return paragrafosFormatados;
+        }
+
+        /** Renderiza os parágrafos no elemento de resultado */
+        function renderizarParagrafos(paragrafos) {
+            resultadoDiv.innerHTML = ''; // limpa
+
+            if (!paragrafos || paragrafos.length === 0) {
+                resultadoDiv.innerHTML = `<div class="placeholder-texto">📭 Nenhum parágrafo encontrado.</div>`;
+                return;
+            }
+
+            // Cria um elemento <p> para cada parágrafo
+            for (let i = 0; i < paragrafos.length; i++) {
+                const p = document.createElement('p');
+                p.textContent = paragrafos[i];
+                resultadoDiv.appendChild(p);
+            }
+        }
+
+        /** Função principal: lê o texto, converte e exibe */
+        function converterEExibir() {
+            const textoOriginal = entrada.value;
+            const paragrafos = converterTextoParaParagrafos(textoOriginal);
+            renderizarParagrafos(paragrafos);
+        }
+
+        /** Define o texto de exemplo e já converte */
+        // function carregarExemplo() {
+        //     entrada.value = TEXTO_EXEMPLO;
+        //     converterEExibir();
+        // }
+
+        /** Limpa entrada e resultado */
+        function limparTudo() {
+            entrada.value = '';
+            resultadoDiv.innerHTML = `<div class="placeholder-texto">✏️ Cole um texto e clique em "Converter".</div>`;
+        }
+
+        /** Copia o texto do resultado para a área de transferência */
+        function copiarResultado() {
+            // Pega todo o texto do resultado (sem as tags HTML)
+            const paragrafos = resultadoDiv.querySelectorAll('p');
+            if (paragrafos.length === 0) {
+                // Se não houver parágrafos, mostra tooltip de erro
+                tooltipCopiar.textContent = '❌ Nada para copiar';
+                tooltipCopiar.style.backgroundColor = '#dc2626';
+                tooltipCopiar.classList.add('mostrar');
+                
+                setTimeout(() => {
+                    tooltipCopiar.textContent = '✅ Copiado!';
+                    tooltipCopiar.style.backgroundColor = '#1e293b';
+                    tooltipCopiar.classList.remove('mostrar');
+                }, 1500);
+                return;
+            }
+
+            // Junta os parágrafos com quebra de linha dupla para manter a estrutura
+            const textoParaCopiar = Array.from(paragrafos)
+                .map(p => p.textContent)
+                .join('\n\n');
+
+            // Usa a API de clipboard (navegadores modernos)
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(textoParaCopiar)
+                    .then(() => {
+                        // Mostra tooltip de sucesso
+                        tooltipCopiar.textContent = '✅ Copiado!';
+                        tooltipCopiar.style.backgroundColor = '#10b981';
+                        tooltipCopiar.classList.add('mostrar');
+                        
+                        setTimeout(() => {
+                            tooltipCopiar.textContent = '✅ Copiado!';
+                            tooltipCopiar.style.backgroundColor = '#1e293b';
+                            tooltipCopiar.classList.remove('mostrar');
+                        }, 1500);
+                    })
+                    .catch(() => {
+                        // Fallback: método antigo
+                        copiarFallback(textoParaCopiar);
+                    });
+            } else {
+                // Fallback para navegadores mais antigos
+                copiarFallback(textoParaCopiar);
+            }
+        }
+
+        /** Método alternativo para copiar (fallback) */
+        function copiarFallback(texto) {
+            const textareaTemp = document.createElement('textarea');
+            textareaTemp.value = texto;
+            textareaTemp.style.position = 'fixed';
+            textareaTemp.style.opacity = '0';
+            textareaTemp.style.left = '-9999px';
+            document.body.appendChild(textareaTemp);
+            
+            try {
+                textareaTemp.select();
+                document.execCommand('copy');
+                tooltipCopiar.textContent = '✅ Copiado!';
+                tooltipCopiar.style.backgroundColor = '#10b981';
+                tooltipCopiar.classList.add('mostrar');
+            } catch (err) {
+                tooltipCopiar.textContent = '❌ Erro ao copiar';
+                tooltipCopiar.style.backgroundColor = '#dc2626';
+                tooltipCopiar.classList.add('mostrar');
+            }
+            
+            document.body.removeChild(textareaTemp);
+            
+            setTimeout(() => {
+                tooltipCopiar.textContent = '✅ Copiado!';
+                tooltipCopiar.style.backgroundColor = '#1e293b';
+                tooltipCopiar.classList.remove('mostrar');
+            }, 1500);
+        }
+
+        // --- Event listeners ---
+        btnConverter.addEventListener('click', converterEExibir);
+
+        btnLimpar.addEventListener('click', limparTudo);
+
+        btnExemplo.addEventListener('click', carregarExemplo);
+
+        btnCopiar.addEventListener('click', copiarResultado);
+
+        // Converte automaticamente ao carregar a página
+        window.addEventListener('load', function() {
+            if (entrada.value.trim() === '') {
+                entrada.value = TEXTO_EXEMPLO;
+            }
+            converterEExibir();
+        });
+
+        // Atalho com Ctrl+Enter (ou Command+Enter) para converter
+        entrada.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                converterEExibir();
+            }
+        });
+
+        // Atalho Ctrl+C (ou Command+C) para copiar quando foco no resultado
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+                // Verifica se o foco está no resultado ou se o resultado tem conteúdo
+                const paragrafos = resultadoDiv.querySelectorAll('p');
+                if (paragrafos.length > 0) {
+                    // Se o foco não está em um input/textarea, copia o resultado
+                    const tagAtiva = document.activeElement;
+                    if (tagAtiva && (tagAtiva.tagName === 'INPUT' || tagAtiva.tagName === 'TEXTAREA')) {
+                        return; // Deixa o Ctrl+C normal funcionar
+                    }
+                    e.preventDefault();
+                    copiarResultado();
+                }
+            }
+        });
+
+    })();
+</script>
+
+</body>
+</html>
